@@ -1,0 +1,6 @@
+# OS / editor cruft
+.DS_Store
+*.log
+
+# Local GitNexus output (indexes live per-repo, never in the kit)
+.gitnexus/

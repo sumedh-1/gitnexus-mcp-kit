@@ -1,0 +1,28 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "GitNexus: bootstrap",
+      "detail": "Install gitnexus (if needed), index repos in repos.list, and ensure ONE shared MCP/web server.",
+      "type": "shell",
+      "command": "bash",
+      "args": ["${workspaceFolder}/scripts/bootstrap.sh", "${workspaceFolder}"],
+      "windows": {
+        "command": "powershell",
+        "args": [
+          "-ExecutionPolicy", "Bypass",
+          "-File", "${workspaceFolder}/scripts/bootstrap.ps1",
+          "${workspaceFolder}"
+        ]
+      },
+      "runOptions": { "runOn": "folderOpen" },
+      "isBackground": false,
+      "presentation": {
+        "reveal": "silent",
+        "panel": "dedicated",
+        "clear": true
+      },
+      "problemMatcher": []
+    }
+  ]
+}

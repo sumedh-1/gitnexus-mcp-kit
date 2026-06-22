@@ -1,0 +1,17 @@
+# GitNexus MCP Kit — repositories to index (OPTIONAL)
+# ------------------------------------------------------------
+# You usually DON'T need to touch this file. By default the kit
+# AUTO-DETECTS every repo in your workspace and indexes it.
+#
+# Use this file only if you prefer to pin repos explicitly, or to
+# add repos that live OUTSIDE the workspace. Entries here are merged
+# with auto-detected repos (set GITNEXUS_AUTO=0 to use ONLY this list).
+#
+# One repo path per line. Absolute, or relative to this kit folder.
+# Lines starting with #, and blank lines, are ignored.
+# ------------------------------------------------------------
+
+# --- Examples (uncomment / edit) ---
+# /Users/you/Downloads/apps/scanapp/parametereditor
+# /Users/you/work/pathologysuite/worklist-service
+# ../my-sibling-repo
