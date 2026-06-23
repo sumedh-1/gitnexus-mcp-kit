@@ -16,7 +16,7 @@ gitnexus-mcp-kit/
 ├── README.md              ← you are here
 ├── repos.list             ← OPTIONAL: pin extra repos (auto-detect covers most)
 ├── .vscode/
-│   ├── mcp.json           ← points Copilot at the shared server (port 4747)
+│   ├── mcp.json           ← points Copilot at the shared server (4747) + Confluence MCP
 │   └── tasks.json         ← auto-runs the bootstrap when the folder opens
 └── scripts/
     ├── index-workspace.sh ← ONE command: index every folder in a .code-workspace
@@ -149,6 +149,42 @@ direct dependants, affected execution flows, and a risk level (LOW → CRITICAL)
 
 ---
 
+## Documentation drift — cross-check code against Confluence
+
+The kit also wires in the **Confluence MCP server** (`mcp-atlassian`), so Copilot can read
+your Confluence space **and** the GitNexus code graph in the **same** conversation. That
+unlocks a powerful check: **does the documentation still match the code?**
+
+> Use GitNexus to read the code graph and the Confluence pages for the scan-parameters
+> space, and list any documentation that is outdated, missing, or contradicted by the code.
+
+Because GitNexus supplies the *real* symbols (classes, methods, DTOs, commands) and
+Confluence supplies the *documented* behavior, Copilot can flag mismatches it could never
+find from either source alone — e.g. a documented popover with no matching command in code,
+undocumented parameters that exist in a DTO, or a page self-marked "in progress."
+
+### One-time setup (per person)
+
+The Confluence server needs **your own** account. Secrets are **never** stored in the repo —
+VS Code prompts for them and keeps them in its secret storage:
+
+1. Install `uv` (provides `uvx`): <https://docs.astral.sh/uv/getting-started/installation/>.
+   On Windows, ensure `uvx` is on your `PATH` (or set the full path to `uvx.exe` as the
+   `command` in `.vscode/mcp.json`).
+2. In Confluence, create a **Personal Access Token**: *Profile → Settings → Personal Access
+   Tokens → Create token*.
+3. Open the workspace. The first time the Confluence tools are used, VS Code prompts for your
+   **email** and **token** (the token field is masked). Done.
+
+The shared, non-secret defaults (`CONFLUENCE_URL`, `CONFLUENCE_SPACE_KEY`,
+`CONFLUENCE_PAGE_ID`) live in `.vscode/mcp.json`; change the space/page IDs to target a
+different area.
+
+> **Security:** never paste a personal access token into the repo or chat. If one is ever
+> shared by accident, **rotate it** in Confluence immediately.
+
+---
+
 ## Configuration (optional env overrides)
 
 | Variable | Default | Meaning |
@@ -173,6 +209,8 @@ direct dependants, affected execution flows, and a risk level (LOW → CRITICAL)
 | Task didn't run on open | VS Code blocks auto-tasks until you **Trust** the folder and **Allow Automatic Tasks** (Command Palette → "Tasks: Manage Automatic Tasks"). |
 | `gitnexus: command not found` | Install Node.js, then re-run bootstrap (it installs gitnexus globally). |
 | Want the visual graph | Open `http://localhost:4747` in a browser after bootstrap. |
+| Confluence tools missing / `uvx` not found | Install `uv` (provides `uvx`) and ensure it's on `PATH`. On Windows you can set the full `uvx.exe` path as the `command` in `.vscode/mcp.json`. |
+| Confluence auth fails | Your Personal Access Token is wrong/expired. Create a new one and re-enter it when VS Code prompts (Command Palette → "MCP: Reset cached inputs" to re-prompt). |
 
 ---
 

@@ -1,8 +1,33 @@
 {
+  "inputs": [
+    {
+      "id": "confluence-username",
+      "type": "promptString",
+      "description": "Your Philips email for Confluence (e.g. first.last@philips.com)"
+    },
+    {
+      "id": "confluence-token",
+      "type": "promptString",
+      "description": "Your Confluence Personal Access Token (create one in Confluence > Settings > Personal Access Tokens)",
+      "password": true
+    }
+  ],
   "servers": {
     "gitnexus": {
       "type": "http",
       "url": "http://localhost:4747/api/mcp"
+    },
+    "confluence": {
+      "type": "stdio",
+      "command": "uvx",
+      "args": ["mcp-atlassian"],
+      "env": {
+        "CONFLUENCE_URL": "https://confluence.atlas.philips.com",
+        "CONFLUENCE_USERNAME": "${input:confluence-username}",
+        "CONFLUENCE_PERSONAL_TOKEN": "${input:confluence-token}",
+        "CONFLUENCE_SPACE_KEY": "DINGH",
+        "CONFLUENCE_PAGE_ID": "44509076"
+      }
     }
   }
 }
