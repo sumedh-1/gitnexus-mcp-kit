@@ -18,6 +18,8 @@
 #   GITNEXUS_AUTO=0            disable workspace auto-detection (use repos.list only)
 #   GITNEXUS_SCAN_ROOT=<dir>   where to auto-detect repos (default: arg1 or kit parent)
 #   GITNEXUS_INSTALL_HOOKS=1   install post-merge/post-checkout re-index git hooks
+#   GITNEXUS_GROUP=0           skip auto-grouping all workspace repos
+#   GITNEXUS_GROUP_NAME=<name> override the auto-generated group name
 #
 # Arg 1 (optional): workspace folder to scan (VS Code passes ${workspaceFolder}).
 # =============================================================================
@@ -113,6 +115,7 @@ fi
 }
 
 # --- 3. Index each repo (respecting freshness) ------------------------------
+$groupNames = New-Object System.Collections.Generic.List[string]
 foreach ($repo in $unique) {
   if (-not (Test-Path $repo -PathType Container)) { Log "skip (not found): $repo"; continue }
   $meta = Join-Path $repo ".gitnexus\meta.json"
@@ -124,13 +127,26 @@ foreach ($repo in $unique) {
   if ($needsIndex) {
     Log "indexing: $repo"
     Push-Location $repo
-    try { gitnexus analyze --skip-git | Out-Null; Log "indexed:  $repo" }
+    try { gitnexus analyze --skip-git | Out-Null; Log "indexed:  $repo"; $groupNames.Add((Split-Path -Leaf $repo)) | Out-Null }
     catch { Log "index FAILED: $repo" }
     finally { Pop-Location }
   } else {
     Log "fresh (<= $FreshDays d), skipping: $repo"
+    $groupNames.Add((Split-Path -Leaf $repo)) | Out-Null
   }
   if ($env:GITNEXUS_INSTALL_HOOKS -eq "1") { Install-Hooks $repo }
+}
+
+# --- 3b. Auto-group all workspace repos for cross-repo impact ----------------
+if (($env:GITNEXUS_GROUP -ne "0") -and ($groupNames.Count -ge 2)) {
+  $gbase = if ($env:GITNEXUS_GROUP_NAME) { $env:GITNEXUS_GROUP_NAME } else { Split-Path -Leaf $scanRoot }
+  $group = ($gbase -replace '[ /]', '-') -replace '[^A-Za-z0-9_-]', ''
+  if ([string]::IsNullOrWhiteSpace($group)) { $group = "workspace" }
+  Log "grouping $($groupNames.Count) repos as '$group' for cross-repo impact..."
+  gitnexus group create $group 2>$null | Out-Null
+  foreach ($n in $groupNames) { gitnexus group add $group $n $n 2>$null | Out-Null }
+  try { gitnexus group sync $group | Out-Null; Log "group '$group' synced" }
+  catch { Log "group sync had warnings" }
 }
 
 # --- 4. Ensure exactly ONE shared server (no duplicates) --------------------
